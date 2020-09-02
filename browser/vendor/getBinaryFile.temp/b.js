@@ -1,0 +1,1 @@
+export #(args) {  fix data = getBinaryFile(`http://localhost/p/safejs/browser/vendor/getBinaryFile.temp/data.bin`)  log(data.length)  log(data    .split(``)    .map(#(c) {      -> c.charCodeAt(0) // & 0xff    })    .join(eol)  )}

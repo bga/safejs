@@ -1,0 +1,1 @@
+export #(root, relative) {  if(isRelativePath(relative)) {    -> root + relative  }  else {    -> relative  }}

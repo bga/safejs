@@ -1,0 +1,3 @@
+export #(s) {
+  -> eval(s)
+}

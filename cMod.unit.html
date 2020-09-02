@@ -1,0 +1,154 @@
+<textarea id = "code" cols = 50 rows = 25>
+  // code hiding line comment
+  /* 
+    code hiding block comment 
+  */
+  # doc line comment
+  ? remark/todo comment
+  # asi included
+  # better macro
+  #define _(name) name ## __LINE__
+  #define calc(name) strip {
+    typeof(name) _(name) = name
+  }
+  case(a == 1) {
+    a()
+  }
+  > f = 1
+  case(b == f) {
+    b()
+  }
+  else {
+    c()
+  }
+  var a = `
+    hello
+    world
+  `
+  fix b = 2_000
+  -> a % b
+  loop {
+    break
+  }
+  Z a&b = 12 * a ** b == 14 => w == 13 => q(
+    1, 
+    2, 
+    3
+  ) \dot b
+  
+  var d = (a
+    <= b
+    <= c
+  )
+  typedef struct A {
+    int a
+  }
+  if(a == 1) {
+    
+  }
+  > var b = a + 2
+  else if(b == 3) {
+    printf(`a`)
+    printf(`b`)
+  }
+  else {
+    
+  }
+  a|B <-> r
+  for(i: 0 << 12) {
+    r = $f + 12
+  }
+</textarea>
+
+
+<textarea id = "out" cols = 50 rows = 25>
+</textarea>
+<br>
+<input type = checkbox id = isJsMode checked>
+<button onclick="convert()">Convert</button>
+<button onclick="check()">Check</button>
+<script src = es5Shim.js></script>
+<script src = compile.js></script>
+<script>
+  var global = this
+  var getBlobUrl = (
+    global.URL && global.URL.createObjectURL && function(blob) {
+      return global.URL.createObjectURL(blob)
+    }
+    || global.createObjectURL && function(blob) {
+      return global.createObjectURL(blob)
+    }
+    // FF4+
+    || global.createBlobURL && function(blob) {
+      return global.createBlobURL(blob)
+    }
+    || null
+  )
+
+  var convert = function() {
+    document.all.out.value = compile(document.all.code.value.trim(), [
+      //bindBreaksToLoops, 
+      replace(/(\s)loop(\s)/g, '$1for(;;)$2'),
+      expandAbbrs,
+
+      replace(/(\s)->(\s)/g, '$1return$2'),
+      curry(transformNumbers, [transformNumbers.release]), 
+      curry(transformSwapOp, ["auto"]),
+      curry(transformUserOp, [transformUserOp.asMethod]),
+      transformImplication,
+      //transformWith,
+      //# line shift 
+      curry(transformLinearComparsion, [transformLinearComparsion.release]),
+      curry(transformPowOp, ["pow", "#include<math.h>\n"]),
+      //? need template fn
+      curry(fixModOp, ["mod", "#include<math.h>\n"]),
+      transformCase, 
+      transformVarInjectionStatic, 
+      //transformSelf,
+      //transformNot,
+      //# C uses {  } for arrays
+      //addBlindCommas,
+      curry(asi, [[/\s+=\s+/, /\s(class|struct|enum|typedef|return|throw|break|goto)\s/]]), 
+      transformF,
+      curry(transformFor, [curry(transformFor.release, ["auto"])]),
+
+      transformCDefine, 
+      stripBlocks, 
+      replace(/(\s)var(\s)/g, "$1auto$2"),
+      replace(/(\s)fix(\s)/g, "$1const auto$2"),
+      replace(/\$/g, '_')
+    ], new CStringLiteralAndCommentCoder())
+  }
+  var check = function() {
+    var code = document.all.out.value
+    if(getBlobUrl) {
+      var s = document.createElement("script")
+      s.src = getBlobUrl(new Blob([";(function() { return; " + document.all.out.value + " })"], { type: "text/javascript" }))
+      document.body.appendChild(s)
+      setTimeout(function() {
+        document.body.removeChild(s)
+      }, 100)
+    }
+    else {
+      Function(document.all.out.value)
+    }
+  }
+  document.onkeyup = function(e) {
+    var enterKey = 13
+    if(e.keyCode == enterKey && e.ctrlKey && !e.shiftKey && !e.altKey) {
+      convert()
+      return false
+    }
+    if(e.keyCode == enterKey && e.ctrlKey && e.shiftKey && !e.altKey) {
+      check()
+      return false
+    }
+    var Y = 89
+    if(e.keyCode == Y && e.ctrlKey && e.shiftKey && !e.altKey) {
+      isJsMode.checked = !isJsMode.checked
+      return false
+    }
+  }
+  code.focus()
+  convert()
+</script>

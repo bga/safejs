@@ -1,0 +1,1 @@
+export #(path) {  -> path.match(/^\//) == null}spec {  assert(self(`b.js`))  assert(!self(`/b.js`))}

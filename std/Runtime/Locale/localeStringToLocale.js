@@ -1,0 +1,1 @@
+export {  `en-en`: EnLocaleString  `ru-RU`: RuLocaleString  `ru`: RuLocaleString}

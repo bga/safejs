@@ -1,0 +1,1 @@
+export #(fileName, lineNo) {  log(`(` + fileName + `:` + lineNo + `) ` + [].slice.call(arguments, 2).join(`, `))}
